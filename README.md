@@ -1,1 +1,5 @@
 # Moses
+
+MOde Subtraction code to Eliminated Systematic contamination in galaxy clustering power spectrum measurements by Benedict Kalus
+
+Requirements: Standard C++ compiler and libraries, complex.h, gsl/gsl_complex_math.h, gsl/gsl_matrix.h>
