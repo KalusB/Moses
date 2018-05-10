@@ -1,6 +1,6 @@
 /*  Header file for .calc_dens_field
     Copyright (C) 2018  Benedict Kalus
-		Modified version of original file by Will Percival
+    Modified version of original file by Will Percival
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
