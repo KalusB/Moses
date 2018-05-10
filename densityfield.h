@@ -1,3 +1,18 @@
+/*  File defining the densfield class and its routines, including debiased
+    mode subtraction
+    Copyright (C) 2018  Benedict Kalus
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef DENSFIELD
 #define DENSFIELD
 
@@ -433,7 +448,6 @@ class densfield {
 
 	// debiased mode subtraction
 	PowerSpec PepsilonBF(PowerSpec Pmod){
-			std::cout<<std::endl<<"##################################################\nDebiased mode subtraction"<<std::endl<<std::endl;
 			if(!init) initialise();
 			double Phat[binnum]={0};
 			for (int bin=0; bin<binnum; bin++) {
