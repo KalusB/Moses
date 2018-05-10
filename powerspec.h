@@ -22,10 +22,7 @@
 #include <gsl/gsl_spline.h>
 #include <time.h>
 
-#include "cosmoparams.h"
 #include "countlines.h"
-#include "growth.h"
-#include "physconst.h"
 
 class PowerSpec{
 	double *k;								// list of k-values
