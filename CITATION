@@ -1,0 +1,24 @@
+@article{Kalus:2016cno,
+      author         = "Kalus, Benedict and Percival, Will J and Bacon, David and
+                        Samushia, Lado",
+      title          = "{Unbiased contaminant removal for 3D galaxy power
+                        spectrum measurements}",
+      journal        = "Mon. Not. Roy. Astron. Soc.",
+      volume         = "463",
+      year           = "2016",
+      number         = "1",
+      pages          = "467-476",
+      doi            = "10.1093/mnras/stw2008",
+      eprint         = "1607.02417",
+      archivePrefix  = "arXiv",
+      primaryClass   = "astro-ph.CO",
+      SLACcitation   = "%%CITATION = ARXIV:1607.02417;%%"
+}
+
+@article{Kalus:2018???,
+      author         = "Kalus, Benedict and Percival, Will J and Bacon, David and
+                        Mueller, Eva-Maria and Samushia, Lado and Verde, Licia and 
+                        Ross, Ashley J and Bernal, Jose L",
+      title          = "{A map-based method for eliminating systematic modes from 
+                        galaxy clustering power spectra with application to BOSS}",
+}
