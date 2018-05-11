@@ -1,4 +1,4 @@
-CC 	= icc -Kc++
+CC 	= g++
 WARN    = -Wall -Wextra
 
 O_ALL	= integration.o table_input.o
