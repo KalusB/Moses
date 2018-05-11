@@ -26,7 +26,10 @@ void read_gal_file(struct use_gal *gal,char *fname,long *nmax,FILE *fout,double 
 
 	// open file and go through lines
 	FILE *fp;
-	if((fp=fopen(fname,"r"))==NULL) err_handler("cannot open galaxy file");
+	if((fp=fopen(fname,"r"))==NULL) {
+		std::cerr<<"cannot open galaxy file"<<std::endl;
+		exit(-30);
+	}
 	const int bsz=400; char buf[bsz];
 
 	long count_gal=0;

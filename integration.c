@@ -13,6 +13,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <iostream>
 #include <stdlib.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -34,8 +35,6 @@
 #define FUNC_SIMPMID(v,w,x) ((*func)(v,w,x))
 #define FUNC_SIMPMID2(v,w) ((*func)(v,w))
 
-void err_handler(char*);
-
 double qsimp(double (*func)(double), double a, double b)
 {
   int j;
@@ -51,7 +50,7 @@ double qsimp(double (*func)(double), double a, double b)
     os=s;
     ost=st;
   }
-  err_handler("Too many steps in routine qsimp");
+  std::cerr<<"Too many steps in routine qsimp"<<std::endl;
   return 0.0;
 }
 

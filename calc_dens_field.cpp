@@ -1,6 +1,6 @@
 /*  Programme to calculate the density field from a galaxy catalogue
 		Call as
-		.calc_dens_field outputfile
+		.calc_dens_field randomcatalogue galaxycatalogue outputfile
     Copyright (C) 2018  Benedict Kalus based on calc_pow.c by Will Percival
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ const double Om_v = cosmoparam::OmegaLambda;
 double calc_dp(double);																	// distance to redshift
 
 int main(int argc, char *argv[]) {
-	if (argc!=2){
+	if (argc!=4){
 		std::cerr<<"Error: Too few arguments. Call as .calc_dens_field outputfile"<<std::endl;
 		return -4;
 	}
@@ -54,7 +54,6 @@ int main(int argc, char *argv[]) {
 	float dz  = (ZMAX-ZMIN)/(float)NZ;
 
 	// set up fast Fourier transform
-	fftw_plan_with_nthreads(16);
 
 	fftw_plan dp_r2c;
 	dp_r2c = fftw_plan_dft_r2c_3d(NX,NY,NZ,ddg,ddgFourier,FFTW_ESTIMATE);
@@ -62,11 +61,17 @@ int main(int argc, char *argv[]) {
 	// allocate memory for galaxies and randoms
 	const long MAX_GAL = 1000000;
 	struct use_gal *gal;
-	if(!(gal = (struct use_gal*)malloc(MAX_GAL*sizeof(struct use_gal))-1)) err_handler("memory allocation problem for galaxies");
+	if(!(gal = (struct use_gal*)malloc(MAX_GAL*sizeof(struct use_gal))-1)) {
+		std::cerr<<"memory allocation problem for galaxies"<<std::endl;
+		exit(-42);
+	}
 
 	const long MAX_RAN = 100000000;
 	struct use_gal *ran;
-	if(!(ran = (struct use_gal*)malloc(MAX_RAN*sizeof(struct use_gal))-1)) err_handler("memory allocation problem for randoms");
+	if(!(ran = (struct use_gal*)malloc(MAX_RAN*sizeof(struct use_gal))-1)) {
+		std::cerr<<"memory allocation problem for randoms"<<std::endl;
+		exit(-43);
+	}
 
 	FILE *fout;
 
@@ -74,13 +79,13 @@ int main(int argc, char *argv[]) {
 	// read in random data
 
 	long nran = MAX_RAN;
-	read_gal_file(ran,"randomfilename",&nran,stderr,REDMIN,REDMAX,12);
+	read_gal_file(ran,argv[1],&nran,stderr,REDMIN,REDMAX,12);
 
 	// *********************************************************
 	// read in galaxy data
 
 	long ngal = MAX_GAL;
-		read_gal_file(gal,"galaxyfilename",&ngal,stderr,REDMIN,REDMAX,0);
+		read_gal_file(gal,argv[2],&ngal,stderr,REDMIN,REDMAX,0);
 
 	// *********************************************************
 	// apply nbar and weights to galaxies & randoms
@@ -188,7 +193,7 @@ int main(int argc, char *argv[]) {
 
 	// Work out |k| for each frequency component
 	double fx, fy, fz;
-	fout=fopen(argv[2],"w");
+	fout=fopen(argv[3],"w");
 	for(int i=0;i<NX;i++) {
 
 		// frequency in x
