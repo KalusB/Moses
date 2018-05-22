@@ -7,3 +7,5 @@ gsl/gsl_spline.h
 
 You are free to use, copy, distribute or modify the source code of Moses under the terms of GPL. Should it be useful for your
 scientific work that leads to a publication, we kindly ask you to cite the respective articles in the CITATION file. 
+
+For comments and questions please send an email to benedict.kalus@icc.ub.edu.
