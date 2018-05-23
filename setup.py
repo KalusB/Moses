@@ -6,7 +6,7 @@ import numpy
 GalaxyvsContaminant = [
     Extension("GalaxyvsContaminant", ["GalaxyvsContaminant.pyx"],
 	libraries=["m"],
-	extra_compile_args = ["-ffast-math"],
+	extra_compile_args = ["-ffast-math","-Wno-cpp"],
     include_dirs=[numpy.get_include()])
 ]
 setup(

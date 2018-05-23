@@ -101,5 +101,4 @@ def main(char* systfilename, double minfsys, double maxfsys, char[:,:] files, ch
 	nsystot/=N
 	nbarbynsystot/=N
 	sigmanbarbynsystot/=N
-	for bin in range(0,numbins):
-		print '[',nsystot[bin],',',nbarbynsystot[bin],',',sigmanbarbynsystot[bin],"],"
+	return np.transpose([nsystot,nbarbynsystot,sigmanbarbynsystot])
