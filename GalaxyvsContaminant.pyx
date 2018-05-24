@@ -1,3 +1,19 @@
+'''
+    Programme to compute the ratio of observed galaxies to expected 
+    galaxies in contaminant bins
+    Copyright (C) 2018  Benedict Kalus
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import numpy as np
 cimport numpy as np
 import healpy as hp
@@ -21,21 +37,22 @@ def binid(double f, double minfsys, double maxfsys):
 	else:
 		return bid
 
-def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, char[:,:] files, char[:,:] randoms, double redshiftmin=0.43, double redshiftmax=0.7):
+#main routine, fsys is a healpix map of the contaminant, mask is an auxiliary map providing the survey footprint, minfsys and maxfsys correspond to the contaminant values of the minimum and maximum bin, Galaxyfiles is a list containing the filenames of galaxy catalogue FITS files (can be more than one to allow e.g. for data on different hemispheres), randoms provides the filenames for the corresponding random catalogues, redshiftmin and redshiftmax are the minimal and maximal redshift of the survey
+def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, char[:,:] Galaxyfiles, char[:,:] randoms, double redshiftmin=0.43, double redshiftmax=0.7):
 	cdef int cell
-	cdef np.ndarray nsys=np.zeros((numbins,len(files)))
-	cdef np.ndarray nbarbynsys=np.zeros((numbins,len(files)))
-	cdef np.ndarray sigmanbarbynsys=np.zeros((numbins,len(files)))
-	cdef np.ndarray ngal=np.zeros(len(files))
+	cdef np.ndarray nsys=np.zeros((numbins,len(Galaxyfiles)))
+	cdef np.ndarray nbarbynsys=np.zeros((numbins,len(Galaxyfiles)))
+	cdef np.ndarray sigmanbarbynsys=np.zeros((numbins,len(Galaxyfiles)))
+	cdef np.ndarray ngal=np.zeros(len(Galaxyfiles))
 
 	cdef int i, nonzerocells, bin
 	cdef double ng, nr, nbarsum, nbarrsum, alpha
 	cdef np.ndarray Galaxydata, Randomdata, nbar, nbarr, nbarb, nbarrb, gal, ran, numfsys
 
-	for i in np.arange(len(files)):
+	for i in np.arange(len(Galaxyfiles)):
 		ng=0
-		Galaxydata = fitsio.read(files[i])
-		print "opened "+files[i]
+		Galaxydata = fitsio.read(Galaxyfiles[i])
+		print "opened "+Galaxyfiles[i]
 		nbar=np.zeros(hp.nside2npix(NSIDE))
 		nbarr=np.zeros(hp.nside2npix(NSIDE))
 		nbarb=np.zeros(numbins)
@@ -50,7 +67,7 @@ def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, char[
 		for cell in np.arange(0,hp.nside2npix(NSIDE)):
 			nbarsum+=nbar[cell]
 		print "ng:",ng,"sum of galaxies in cells:",nbarsum
-		print "read "+files[i]
+		print "read "+Galaxyfiles[i]
 		ngal[i]=Galaxydata.shape[0]
 		del Galaxydata
 		Randomdata = fitsio.read(randoms[i])
@@ -84,7 +101,7 @@ def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, char[
 	cdef np.ndarray nbarbynsystot=np.zeros(numbins)
 	cdef np.ndarray sigmanbarbynsystot=np.zeros(numbins)
 	cdef double N=0
-	for i in np.arange(len(files)):
+	for i in np.arange(len(Galaxyfiles)):
 		nsystot+=nsys[:,i]*ngal[i]
 		nbarbynsystot+=nbarbynsys[:,i]*ngal[i]
 		sigmanbarbynsystot+=sigmanbarbynsys[:,i]*ngal[i]
