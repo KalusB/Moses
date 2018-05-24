@@ -25,4 +25,4 @@ all_pyx: GalaxyvsContaminant.pyx
 	python setup.py build_ext --inplace
 
 clear:
-	rm -r calc_dens_field ftempFFTW GalaxyvsContaminant.c *.so *.o main build
+	rm -r calc_dens_field ftempFFTW GalaxyvsContaminant.c rho_r.c template_fit.c *.so *.o main build

@@ -21,16 +21,8 @@ def binid(double f, double minfsys, double maxfsys):
 	else:
 		return bid
 
-def main(char* systfilename, double minfsys, double maxfsys, char[:,:] files, char[:,:] randoms, double redshiftmin=0.43, double redshiftmax=0.7):
-	cdef np.ndarray fsys=np.nan_to_num(np.loadtxt(systfilename))
-	cdef np.ndarray mask=np.zeros(len(fsys))
+def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, char[:,:] files, char[:,:] randoms, double redshiftmin=0.43, double redshiftmax=0.7):
 	cdef int cell
-	for cell in np.arange(len(fsys)):
-		if fsys[cell]==0:
-			mask[cell]=0
-		else:
-			mask[cell]=1
-	fsys/=mask
 	cdef np.ndarray nsys=np.zeros((numbins,len(files)))
 	cdef np.ndarray nbarbynsys=np.zeros((numbins,len(files)))
 	cdef np.ndarray sigmanbarbynsys=np.zeros((numbins,len(files)))
