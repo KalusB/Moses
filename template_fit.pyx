@@ -113,8 +113,5 @@ def main(char* systfilename, char* label, char* rhorfilename, double minfsys, do
 		Wrhobar_over_rhobar=np.dot(rho_r*W)/np.sum(rho_r)
 		for ipos in np.arange(NX*NY*NZ):
 			f[ipos][deg-1]=(W[ipos]-Wrhobar_over_rhobar)*rho_r[ipos]
-	cdef np.ndarray fout=np.zeros(NX*NY*NZ)
 	for deg in np.arange(1,totdeg+1):
-		for ipos in np.arange(NX*NY*NZ):
-			fout[ipos]=f[ipos][deg-1]*Wtot[ipos]
 		np.savetxt("f"+label+str(deg)+"_NGC_BOX128.txt",f[:,deg-1])
