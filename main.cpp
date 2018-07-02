@@ -34,7 +34,7 @@ int main(int argc, const char *argv[]){
 		PowerSpec PFKP=F.PFKP();													// calculate power without error mitigation
 		PowerSpec PepsilonBF=F.PepsilonBF(P);							// apply debiased mode subtraction with Patchy prior
 		PowerSpec Pmod=F.Pmodsample(P);										// interpolate Patchy mocks for the same k-bins as the measured powers
-		// print power spectrum results, mode projection only printed for single template
+		// print power spectrum results
 		for (int ibin=0; ibin<binnum; ibin++) {
 			std::cout<<PFKP.getk(ibin)<<'\t'<<F.getNk(ibin)<<'\t'<<PFKP.getP(ibin)<<'\t'<<PepsilonBF.getP(ibin)<<'\t'<<Pmod.getP(ibin)<<std::endl;
 		}
