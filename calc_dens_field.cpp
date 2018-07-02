@@ -24,7 +24,7 @@ double calc_dp(double);																	// distance to redshift
 
 int main(int argc, char *argv[]) {
 	if (argc!=4){
-		std::cerr<<"Error: Too few arguments. Call as .calc_dens_field outputfile"<<std::endl;
+		std::cerr<<"Error: Too few arguments. Call as .calc_dens_field randomcatalogue galaxycatalogue outputfile"<<std::endl;
 		return -4;
 	}
 	const double area=6851.4, REDMIN=0.43, REDMAX=0.70;		// specs for BOSS CMASS
