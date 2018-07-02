@@ -16,6 +16,7 @@
 #ifndef DENSFIELD
 #define DENSFIELD
 
+#include <cmath>
 #include <complex.h>
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_matrix.h>
