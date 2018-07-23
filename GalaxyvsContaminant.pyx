@@ -38,7 +38,7 @@ def binid(double f, double minfsys, double maxfsys):
 		return bid
 
 #main routine, fsys is a healpix map of the contaminant, mask is an auxiliary map providing the survey footprint, minfsys and maxfsys correspond to the contaminant values of the minimum and maximum bin, Galaxyfiles is a list containing the filenames of galaxy catalogue FITS files (can be more than one to allow e.g. for data on different hemispheres), randoms provides the filenames for the corresponding random catalogues, redshiftmin and redshiftmax are the minimal and maximal redshift of the survey
-def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, char[:,:] Galaxyfiles, char[:,:] randoms, double redshiftmin=0.43, double redshiftmax=0.7):
+def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, np.ndarray Galaxyfiles, np.ndarray randoms, double redshiftmin=0.43, double redshiftmax=0.7):
 	cdef int cell
 	cdef np.ndarray nsys=np.zeros((numbins,len(Galaxyfiles)))
 	cdef np.ndarray nbarbynsys=np.zeros((numbins,len(Galaxyfiles)))
@@ -47,7 +47,7 @@ def main(np.ndarray fsys, np.ndarray mask, double minfsys, double maxfsys, char[
 
 	cdef int i, nonzerocells, bin
 	cdef double ng, nr, nbarsum, nbarrsum, alpha
-	cdef np.ndarray Galaxydata, Randomdata, nbar, nbarr, nbarb, nbarrb, gal, ran, numfsys
+	cdef np.ndarray Galaxydata, Randomdata, nbar, nbarr, nbarb, nbarrb, numfsys
 
 	for i in np.arange(len(Galaxyfiles)):
 		ng=0
