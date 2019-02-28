@@ -6,16 +6,17 @@ import numpy
 extensions = [
     Extension("GalaxyvsContaminant", ["GalaxyvsContaminant.pyx"],
 	libraries=["m"],
-	extra_compile_args = ["-ffast-math","-Wno-cpp"],
-    include_dirs=[numpy.get_include()]),
-    Extension("template_fit", ["template_fit.pyx"],
+	extra_compile_args = ["-O3", "-ffast-math", "-march=native", "-fopenmp" ,"-Wno-cpp"],
+	include_dirs=[numpy.get_include()],
+	extra_link_args=['-fopenmp']),
+	Extension("template_fit", ["template_fit.pyx"],
 	libraries=["m"],
 	extra_compile_args = ["-ffast-math","-Wno-cpp"],
-    include_dirs=[numpy.get_include()]),
-    Extension("rho_r", ["rho_r.pyx"],
+	include_dirs=[numpy.get_include()]),
+	Extension("rho_r", ["rho_r.pyx"],
 	libraries=["m"],
 	extra_compile_args = ["-ffast-math","-Wno-cpp"],
-    include_dirs=[numpy.get_include()])
+	include_dirs=[numpy.get_include()])
 
 ]
 setup(
