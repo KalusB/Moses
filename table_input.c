@@ -1,4 +1,4 @@
-/*  Routine to read in galaxy catalogue files 
+/*  Routine to read in galaxy catalogue files
     Copyright (C) 2018  Benedict Kalus
     Modified version of original file by Will Percival
     This program is free software: you can redistribute it and/or modify
@@ -108,6 +108,7 @@ void read_gal_file(struct use_gal *gal,char *fname,long *nmax,FILE *fout,double 
 
 			if(++count_gal>(*nmax)) {
 				count_gal--;
+				std::cerr<<"Warning: Reached count_gal=nmax. Increase nmax read_gal_file"<<std::endl;
 				break;
 			}
 
@@ -174,6 +175,7 @@ void read_gal_file(struct use_gal *gal,char *fname,long *nmax,FILE *fout,double 
 			if(fflag==9) {
 				nread = sscanf(buf,"%lf %lf %lf %lf",&tmp1,&tmp2,&tmp3,&tmp4);
 				if(++count_gal>(*nmax)) {
+					std::cerr<<"Warning: Reached count_gal=nmax. Increase nmax read_gal_file"<<std::endl;
 					count_gal--;
 					break;
 				}
