@@ -25,8 +25,8 @@
 #include "powerspec.h"
 
 // set the binning (hard wired)
-const int binnum=29;
-const double bins[binnum+1]={0,0.006,0.008,0.009,0.01,0.011,0.012,0.013,0.014,0.015,0.017,0.018,0.019,0.02,0.021,0.022,0.023,0.024,0.025,0.026,0.027,0.028,0.029,0.03,0.031,0.032,0.033,0.034,0.035,0.2};
+const int binnum=35;
+const double bins[binnum+1]={0,0.004,0.005,0.006,0.007,0.008,0.009,0.0095,0.01,0.0105,0.011,0.012,0.013,0.014,0.015,0.017,0.018,0.019,0.02,0.021,0.022,0.023,0.024,0.025,0.026,0.027,0.028,0.029,0.03,0.031,0.032,0.033,0.034,0.035,0.04,0.05};
 
 // define density field class
 class densfield {
@@ -53,29 +53,49 @@ class densfield {
 
 		// constructor of an uninitialised density field container
 		densfield(int size): size(size){
-				k1 = (double*)malloc(sizeof(double)*size);
-				k2 = (double*)malloc(sizeof(double)*size);
-				k3 = (double*)malloc(sizeof(double)*size);
-				binid=(int*)malloc(sizeof(int)*size);
-				keff=(double*)malloc(sizeof(double)*size);
-				Nk=(int*)malloc(sizeof(int)*size);
-				Ff = (double complex*)malloc(sizeof(double complex)*size);
-				F = (double complex*)malloc(sizeof(double complex)*size);
-				for (int ik=0; ik<size; ik++){
-						binid[ik]=0;
-						k1[ik]=0;
-						k2[ik]=0;
-						k3[ik]=0;
-						F[ik]=0;
-						Ff[ik]=0;
-				}
-				for (int ibin=0; ibin<binnum; ibin++) {
-						keff[ibin]=0;
-						Nk[ibin]=0;
-				}
+				k_initialisation(size);
 				SN=0;
 				init=false;
 				tempnum=1;
+		}
+
+		// constructor for a density field reading only the density field
+		densfield(const char *densfile){
+			FILE *file;
+			const int linelength=100;
+			char readline[linelength];
+			int ik=0;
+			if ((file=fopen(densfile,"r"))==NULL){
+				std::cerr<<"error: "<<densfile<<" cannot be opened"<<std::endl;
+				exit(-1);
+			}
+			const int linecount=countlines(file);
+			size=linecount;
+			k_initialisation(size);
+			double Fr, Fi;																							// dummy variables for real and imaginary parts of field values
+			ik=0;
+			while (fgets(readline, linelength, file) && ik<linecount){
+				sscanf(readline, "%le%le%le%le%le", &k1[ik], &k2[ik], &k3[ik], &Fr, &Fi);
+				double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
+				F[ik]=Fr+I*Fi;
+				Ff[ik]=0.;
+				for(int bid=0; bid<binnum; bid++){
+					if (bins[bid]<k && bins[bid+1]>k) {
+						keff[bid]+=k;																				// sum up k values to obtain effective k of bin
+						++Nk[bid];																					// count modes in bin
+						binid[ik]=bid;																			// assign bin to mode
+						break;
+					}
+				}
+				++ik;
+			}
+			for (int ibin=0; ibin<binnum; ibin++) {
+					keff[ibin]/=Nk[ibin];																	// devide sum of k-values by number of bins
+			}
+			fclose(file);
+			SN=0;																											// set shot noise to zero by default
+			init=true;
+			tempnum=0;																								// this constructor only works for a single template
 		}
 
 	// constructor for a density field reading in a single template field and a density field
@@ -88,21 +108,7 @@ class densfield {
 		const int linecount=countlines(file);
 		size=linecount;
 		double Ffr, Ffi;																							// dummy variables for real and imaginary parts of template
-		k1 = (double*)malloc(sizeof(double)*linecount);
-		k2 = (double*)malloc(sizeof(double)*linecount);
-		k3 = (double*)malloc(sizeof(double)*linecount);
-		binid=(int*)malloc(sizeof(int)*linecount);
-		keff=(double*)malloc(sizeof(double)*linecount);
-		Nk=(int*)malloc(sizeof(int)*linecount);
-		Ff = (double complex*)malloc(sizeof(double complex)*linecount);
-		F = (double complex*)malloc(sizeof(double complex)*linecount);
-		for (int ik=0; ik<linecount; ik++){
-			binid[ik]=0;
-		}
-		for (int ibin=0; ibin<binnum; ibin++) {
-			keff[ibin]=0;
-			Nk[ibin]=0;
-		}
+		k_initialisation(size);
 		const int linelength=100;
 		char readline[linelength];
 		int ik=0;
@@ -126,7 +132,7 @@ class densfield {
 			sscanf(readline, "%le%le%le%le%le", &k1[ik], &k2[ik], &k3[ik], &Fr, &Fi);
 			// check whether k-values in density and template files agree
 			if ((fabs(k1b-k1[ik])>0.00001)||(fabs(k2b-k2[ik])>0.00001)||(fabs(k3b-k3[ik])>0.00001)) {
-				std::cout<<ik<<'\t'<<k1b<<"="<<k1[ik]<<'\t'<<k2b<<"="<<k2[ik]<<'\t'<<k3b<<"="<<k3[ik]<<std::endl;
+				std::cerr<<ik<<'\t'<<k1b<<"="<<k1[ik]<<'\t'<<k2b<<"="<<k2[ik]<<'\t'<<k3b<<"="<<k3[ik]<<std::endl;
 				std::cerr<<"k-values of field and template do not agree\n"<<readline<<std::endl;
 				exit(-2);
 			}
@@ -160,14 +166,7 @@ class densfield {
 		}
 		const int linecount=countlines(file);
 		size=linecount;
-		k1 = (double*)malloc(sizeof(double)*linecount);
-		k2 = (double*)malloc(sizeof(double)*linecount);
-		k3 = (double*)malloc(sizeof(double)*linecount);
-		binid=(int*)malloc(sizeof(int)*linecount);
-		keff=(double*)malloc(sizeof(double)*linecount);
-		Nk=(int*)malloc(sizeof(int)*linecount);
-		Ff = (double complex*)malloc(sizeof(double complex)*linecount*tempnum);				// array comprises all templates
-		F = (double complex*)malloc(sizeof(double complex)*linecount);
+		k_initialisation(size,tempnum);
 		double Fr, Fi;
 		const int linelength=100;
 		char readline[linelength];
@@ -180,6 +179,7 @@ class densfield {
 		fclose(file);
 		// iterate over list of template files
 		for(int temp=0; temp<tempnum; temp++){
+			std::cout<<"Opening template file "<<tempfilelist[temp+2]<<std::endl;
 			if ((file=fopen(tempfilelist[temp+2],"r"))==NULL){
 				std::cerr<<"error: "<<tempfilelist[temp+2]<<" cannot be opened"<<std::endl;
 				exit(-1);
@@ -203,21 +203,21 @@ class densfield {
 		}
 		SN=0;
 		initialise();
+		std::cout<<"Density file and template files successfully read"<<std::endl;
 	}
 
 	// copy constructor
 	densfield(const densfield& other){
 		size=other.size;
-		k1 = (double*)malloc(sizeof(double)*size);
-		k2 = (double*)malloc(sizeof(double)*size);
-		k3 = (double*)malloc(sizeof(double)*size);
-		Ff = (double complex*)malloc(sizeof(double complex)*size);
-		F = (double complex*)malloc(sizeof(double complex)*size);
+		tempnum=other.tempnum;
+		k_initialisation(size,tempnum);
 		for (int ik=0; ik<size; ik++) {
 			k1[ik]=other.k1[ik];
 			k2[ik]=other.k2[ik];
 			k3[ik]=other.k3[ik];
-			Ff[ik]=other.Ff[ik];
+			for (int temp=0; temp<tempnum; temp++){
+				Ff[ik+temp*size]=other.Ff[ik+temp*size];
+			}
 			F[ik]=other.F[ik];
 		}
 		init=other.init;
@@ -248,23 +248,47 @@ class densfield {
 	densfield& operator=(const densfield& other){
 		if (this != &other) {
 			size=other.size;
-			k1 = (double*)malloc(sizeof(double)*size);
-			k2 = (double*)malloc(sizeof(double)*size);
-			k3 = (double*)malloc(sizeof(double)*size);
-			Ff = (double complex*)malloc(sizeof(double complex)*size);
-			F = (double complex*)malloc(sizeof(double complex)*size);
+			tempnum=other.tempnum;
+			k_initialisation(size,tempnum);
 			for (int ik=0; ik<size; ik++) {
 				k1[ik]=other.k1[ik];
 				k2[ik]=other.k2[ik];
 				k3[ik]=other.k3[ik];
-				Ff[ik]=other.Ff[ik];
+				for (int temp=0; temp<tempnum; temp++){
+					Ff[ik+temp*size]=other.Ff[ik+temp*size];
+				}
 				F[ik]=other.F[ik];
 			}
+			init=other.init;
+			SN=other.SN;
+			tempnum=other.tempnum;
 		}
-		init=other.init;
-		SN=other.SN;
-		tempnum=other.tempnum;
 		return *this;
+	}
+
+	void k_initialisation(int size, int tempnum=1) {
+		k1 = (double*)malloc(sizeof(double)*size);
+		k2 = (double*)malloc(sizeof(double)*size);
+		k3 = (double*)malloc(sizeof(double)*size);
+		binid=(int*)malloc(sizeof(int)*size);
+		keff=(double*)malloc(sizeof(double)*size);
+		Nk=(int*)malloc(sizeof(int)*size);
+		Ff = (double complex*)malloc(sizeof(double complex)*size*tempnum);
+		F = (double complex*)malloc(sizeof(double complex)*size);
+		for (int ik=0; ik<size; ik++){
+				binid[ik]=binnum+1;
+				k1[ik]=0;
+				k2[ik]=0;
+				k3[ik]=0;
+				F[ik]=0;
+				for (int temp=0; temp<tempnum; temp++){
+					Ff[ik+temp*size]=0;
+				}
+		}
+		for (int ibin=0; ibin<binnum; ibin++) {
+				keff[ibin]=0;
+				Nk[ibin]=0;
+		}
 	}
 
 	// procedure to set single entries
@@ -294,7 +318,7 @@ class densfield {
 		if (ik<size){
 			return sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
 		}else{
-			std::cout<<ik<<" is out of range"<<std::endl;
+			std::cerr<<ik<<" is out of range"<<std::endl;
 			exit(-5);
 		}
 	}
@@ -303,7 +327,7 @@ class densfield {
 		if (ik<size){
 			return creal(F[ik]);
 		}else{
-			std::cout<<ik<<" is out of range"<<std::endl;
+			std::cerr<<ik<<" is out of range"<<std::endl;
 			exit(-5);
 		}
 	}
@@ -333,13 +357,17 @@ class densfield {
 		}
 		for(int ik=0; ik<size; ik++){
 				double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
-				for(int bid=0; bid<binnum; bid++){
+				int bid=0;
+				for(bid=0; bid<binnum; bid++){
 					if (bins[bid]<k && bins[bid+1]>k) {
 								keff[bid]+=k;
 								if (k!=0.) ++Nk[bid];
 								binid[ik]=bid;
 								break;
 					}
+				}
+				if (bid!=binid[ik]){
+					binid[ik]=binnum+1;
 				}
 		}
 		for (int ibin=0; ibin<binnum; ibin++) {
@@ -376,6 +404,10 @@ class densfield {
 		for (int ik=0; ik<size; ik++) {
 			double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
 			for (int A=0; A<tempnum; A++){
+				if (Pmodel.getP(binid[ik])==0){
+					std::cerr<<"Error: Model power spectrum is 0 in bin "<<binid[ik]<<std::endl;
+					exit(-140);
+				}
 				double complex Sadd=Ff[ik+size*A]*conj(F[ik])/Pmodel.getP(binid[ik]);
 				gsl_vector_complex_set (S, A, gsl_complex_add(gsl_vector_complex_get (S, A), gsl_complex_rect(creal(Sadd),cimag(Sadd))));
 				for (int B=0; B<tempnum; B++){
@@ -428,8 +460,10 @@ class densfield {
 					Phat[bin]=0;
 			}
 			for (int ik=0; ik<size; ik++) {
+				if (binid[ik]<binnum){
 					double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
 					Phat[binid[ik]]+=Pmod.Pm(k)/Nk[binid[ik]];
+				}
 			}
 			return PowerSpec(binnum, keff, Phat);
 	}
@@ -441,8 +475,11 @@ class densfield {
 		for (int bin=0; bin<binnum+1; bin++) {
 			Phat[bin]=-SN;
 		}
+		int Nk0=0;
 		for (int ik=0; ik<size; ik++) {
-			Phat[binid[ik]]+=cabs(F[ik])*cabs(F[ik])/Nk[binid[ik]];
+			if (binid[ik]<binnum){
+				Phat[binid[ik]]+=cabs(F[ik])*cabs(F[ik])/Nk[binid[ik]];
+			}
 		}
 		return PowerSpec(binnum, keff, Phat);
 	}
@@ -459,8 +496,10 @@ class densfield {
 				calc_RP_SP(Pmod);
 				double epsilonbf=SP/RP;
 				for (int ik=0; ik<size; ik++) {
-					double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
-				 	Phat[binid[ik]]+=pow(cabs(F[ik]-epsilonbf*Ff[ik]),2)/(1-1./RP*cabs(Ff[ik])*cabs(Ff[ik])/Pmod.Pm(k));
+					if (binid[ik]<binnum){
+						double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
+				 		Phat[binid[ik]]+=pow(cabs(F[ik]-epsilonbf*Ff[ik]),2)/(1-1./RP*cabs(Ff[ik])*cabs(Ff[ik])/Pmod.Pm(k));
+					}
 				}
 			// implementation for an arbitrary number of templates
 			}else{
@@ -474,20 +513,22 @@ class densfield {
 					std::cout<<"epsilonBF"<<A<<"="<<epsilonBF[A]<<std::endl;
 				}
 				for (int ik=0; ik<size; ik++) {
-					double complex D=F[ik];												// corrected density field is measured density field...
-					for (int A=0; A<tempnum; A++){
-						D-=epsilonBF[A]*Ff[ik+A*size];							// ... minus templates with best fitting amplitudes
-					}
-					double corrf=0;																// correction factor for debiasing
-					double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
-					for (int A=0; A<tempnum; A++){
-						for (int B=0; B<tempnum; B++){
-							double complex RinvAB=GSL_REAL(gsl_matrix_complex_get(Rinv, A, B))+I*GSL_IMAG(gsl_matrix_complex_get(Rinv, A, B));
-							corrf+=creal(Ff[ik+A*size]*RinvAB*Ff[ik+B*size]);
+					if (binid[ik]<binnum){
+						double complex D=F[ik];												// corrected density field is measured density field...
+						for (int A=0; A<tempnum; A++){
+							D-=epsilonBF[A]*Ff[ik+A*size];							// ... minus templates with best fitting amplitudes
 						}
+						double corrf=0;																// correction factor for debiasing
+						double k=sqrt(k1[ik]*k1[ik]+k2[ik]*k2[ik]+k3[ik]*k3[ik]);
+						for (int A=0; A<tempnum; A++){
+							for (int B=0; B<tempnum; B++){
+								double complex RinvAB=GSL_REAL(gsl_matrix_complex_get(Rinv, A, B))+I*GSL_IMAG(gsl_matrix_complex_get(Rinv, A, B));
+								corrf+=creal(Ff[ik+A*size]*RinvAB*Ff[ik+B*size]);
+							}
+						}
+						// summing up absolute corrected field values squared with bias correction
+						Phat[binid[ik]]+=pow(cabs(D),2)/(1-corrf/Pmod.Pm(k));
 					}
-					// summing up absolute corrected field values squared with bias correction
-					Phat[binid[ik]]+=pow(cabs(D),2)/(1-corrf/Pmod.Pm(k));
 				}
 			}
 			for (int bin=0; bin<binnum; bin++){
@@ -495,6 +536,48 @@ class densfield {
 					Phat[bin]-=SN;										// subtract shot noise
 			}
 			return PowerSpec(binnum, keff, Phat);
+	}
+
+	// Get the cleaned density field
+	densfield get_cleaned(PowerSpec Pmod){
+		if(!init) initialise();
+		densfield output_field(size);
+		if (tempnum==1){
+			calc_RP_SP(Pmod);
+			double epsilonbf=SP/RP;
+			for (int ik=0; ik<size; ik++) {
+				output_field.k1[ik]=k1[ik];
+				output_field.k2[ik]=k2[ik];
+				output_field.k3[ik]=k3[ik];
+				output_field.Ff[ik]=0;
+				output_field.F[ik]=F[ik]-epsilonbf*Ff[ik];
+			}
+		}else{
+			calc_R_S(Pmod);
+			double epsilonBF[tempnum];											// array of best fitting epsilon for each template
+			for (int A=0; A<tempnum; A++){
+				epsilonBF[A]=0;
+				for (int B=0; B<tempnum; B++){
+					epsilonBF[A]+=GSL_REAL(gsl_complex_mul(gsl_matrix_complex_get(Rinv, A, B), gsl_vector_complex_get(S, B)));
+				}
+				std::cout<<"epsilonBF"<<A<<"="<<epsilonBF[A]<<std::endl;
+			}
+			for (int ik=0; ik<size; ik++) {
+				output_field.k1[ik]=k1[ik];
+				output_field.k2[ik]=k2[ik];
+				output_field.k3[ik]=k3[ik];
+				output_field.Ff[ik]=0;
+				if (binid[ik]<binnum){
+					output_field.F[ik]=F[ik];												// corrected density field is measured density field...
+					for (int A=0; A<tempnum; A++){
+						output_field.F[ik]-=epsilonBF[A]*Ff[ik+A*size];							// ... minus templates with best fitting amplitudes
+					}
+				}
+			}
+		}
+		output_field.init=init;
+		output_field.SN=SN;
+		return output_field;
 	}
 };
 

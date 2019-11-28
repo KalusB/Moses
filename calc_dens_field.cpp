@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 	dp_r2c = fftw_plan_dft_r2c_3d(NX,NY,NZ,ddg,ddgFourier,FFTW_ESTIMATE);
 
 	// allocate memory for galaxies and randoms
-	const long MAX_GAL = 1000000;
+	const long MAX_GAL = 100000000;
 	struct use_gal *gal;
 	if(!(gal = (struct use_gal*)malloc(MAX_GAL*sizeof(struct use_gal))-1)) {
 		std::cerr<<"memory allocation problem for galaxies"<<std::endl;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 	// read in galaxy data
 
 	long ngal = MAX_GAL;
-		read_gal_file(gal,argv[2],&ngal,stderr,REDMIN,REDMAX,0);
+	read_gal_file(gal,argv[2],&ngal,stderr,REDMIN,REDMAX,12);
 
 	// *********************************************************
 	// apply nbar and weights to galaxies & randoms

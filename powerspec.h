@@ -188,7 +188,7 @@ class PowerSpec{
 
 	// overload the subscript operator returning the ith element of the power spectrum array if i is smaller than the size of the array
 	double operator[](int i){
-		return (i<(int)ksteps)?P[i]:0;
+		return (i<(int)ksteps)?P[i]:0.1;
 	}
 
 	// get ith k value
@@ -198,7 +198,7 @@ class PowerSpec{
 
 	// get power spectrum value, just references operator[]
 	inline double getP(int i){
-		return P[i];
+		return (P[i]>0.1)?P[i]:0.1;
 	}
 
 };

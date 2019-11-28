@@ -1,5 +1,5 @@
-/*  Example file to use MOSES on a data file and an arbitrary number of 
-    template files. Call the programme as 
+/*  Example file to use MOSES on a data file and an arbitrary number of
+    template files. Call the programme as
     ./main datafile tempfile1 tempfile2 ... tempfileN shotnoisevalue
     Copyright (C) 2018  Benedict Kalus
 
@@ -23,7 +23,7 @@
 
 int main(int argc, const char *argv[]){
 		if (argc<3){
-			std::cerr<<"Error: Too few arguments"<<std::endl;
+			std::cerr<<"Error: Too few arguments: datafile tempfile1 tempfile2 ... tempfileN shotnoisevalue"<<std::endl;
 			return -4;
 		}
 		PowerSpec P("./P_Patchy.txt");										// read in average power spectrum from Patchy mocks
@@ -38,5 +38,7 @@ int main(int argc, const char *argv[]){
 		for (int ibin=0; ibin<binnum; ibin++) {
 			std::cout<<PFKP.getk(ibin)<<'\t'<<F.getNk(ibin)<<'\t'<<PFKP.getP(ibin)<<'\t'<<PepsilonBF.getP(ibin)<<'\t'<<Pmod.getP(ibin)<<std::endl;
 		}
+		std::cout<<"Cleaned density field:"<<std::endl;
+		F.get_cleaned(PepsilonBF).print();
     return 0;
 }
