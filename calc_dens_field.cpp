@@ -105,15 +105,14 @@ int main(int argc, char *argv[]) {
 		double rup=rmin+(ir+1)*dr;
 		Volrbin[ir]=areaRad/3.*(rup*rup*rup-rlow*rlow*rlow);
 	}
-	double wfkp=1.;
   for(long ig=1;ig<=ngal;ig++) {
-		//double wfkp = 1.0/(1.0+Pfkp*gal[ig].nbar);
+		double wfkp = 1.0/(1.0+Pfkp*gal[ig].nbar);
 		gal[ig].wght *= wfkp;
 		numgalrbin[(int)((gal[ig].dist()-rmin)/dr)]+=gal[ig].wght;
 	}
 
   for(long ir=1;ir<=nran;ir++) {
-		//double wfkp = 1.0/(1.0+Pfkp*ran[ir].nbar);
+		double wfkp = 1.0/(1.0+Pfkp*ran[ir].nbar);
 		ran[ir].wght *= wfkp;
 		numranrbin[(int)((ran[ir].dist()-rmin)/dr)]+=ran[ir].wght;
   }
